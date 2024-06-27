@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
 import requests
-from flask import Flask, render_template, request, url_for, redirect
+from flask import Flask, render_template, request, url_for, redirect, json
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import func
 
@@ -74,28 +74,36 @@ with app.app_context():
     db.create_all()
 
 def calculateCondition(length, wind, waves):
-   print("calculating condition for", str(length), str(wind), str(waves))
    condition = 'good'
    if wind < 5:
-    print("wind < 5")
     condition = 'too-calm'  
     return condition
-   if wind > 20 or waves/length > .05:
-    print("wind too high or wavess over 5 percent")
+   if wind > 20 or waves/length > .07:
     condition = 'rough'
     return condition
    if wind/length > .5:
-    print("wind too little wind")
     condition = 'too-calm'
    
    return condition
 
 
-@app.route("/get_forecast")
+@app.route("/get_forecast_post", methods=["POST"])
+def forecasterpost():
+ print(request.data)
+ print(type(request.data))
+ data = json.loads(request.data)
+ print(data)
+ print(type(data))
+ return data['city']
+
+@app.route("/get_forecast", methods=["POST"])
 def forecaster():
- with app.app_context():
-    location = "New York"
-    length = 30
+ print(type(request.data))
+ print(request.data) 
+ data = json.loads(request.data)
+ location = data['city']
+ length = data['length']
+ with app.app_context():	
     forecasts = Forecasts.query.filter_by(location=location).all()
     print(forecasts)
     print("record count ",str(len(forecasts)))
@@ -110,6 +118,8 @@ def forecaster():
       dayObject = {}
       print(forecasts[x].day)
       dayObject['day']=forecasts[x].day
+      dayObject['day_condition']=forecasts[x].day_condition
+      dayObject['day_condition_icon']=forecasts[x].day_condition_icon
       dayObject['sailing_condition_7']=calculateCondition(length,forecasts[x].h1_wind_speed,forecasts[x].h1_swell_ht_ft)
       dayObject['sailing_condition_8']=calculateCondition(length,forecasts[x].h2_wind_speed,forecasts[x].h2_swell_ht_ft)
       dayObject['sailing_condition_9']=calculateCondition(length,forecasts[x].h3_wind_speed,forecasts[x].h3_swell_ht_ft)
