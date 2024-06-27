@@ -4,9 +4,14 @@ import requests
 from flask import Flask, render_template, request, url_for, redirect, json
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import func
+from prometheus_flask_exporter import PrometheusMetrics
 
 app = Flask(__name__)
 
+
+metrics = PrometheusMetrics(app)
+
+metrics.info("app_info", "App Info, this can be anything you want", version="1.0.0")
 
 app.config['SQLALCHEMY_DATABASE_URI'] ='postgresql://uahr1t8mhbh2ou:p37de180475ed61ab5fa6d80a4d446a1c7135e89607020eae8dc5f7d4e34caf5b@cd1goc44htrmfn.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/d5ukmvbbr0hl1d'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -86,6 +91,13 @@ def calculateCondition(length, wind, waves):
    
    return condition
 
+@app.route("/health_check")
+def health():
+  return "OK"
+
+@app.route("/metrics")
+def metrics():
+  return "OK"
 
 @app.route("/get_forecast_post", methods=["POST"])
 def forecasterpost():
