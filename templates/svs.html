@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1 class="title">{% block title %} Students {% endblock %}</h1>
+    <div class="content">
+        {% for forecast in forecasts %}
+            <div class="student">
+                <p><b>#{{ forecast.id }}</b></p>
+                <b>
+                </b>
+                <div class="bio">
+                    <h4>{{ forecast.location }} {{ forecast.day }}</h4>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
